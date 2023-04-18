@@ -7,6 +7,7 @@ import { Audio } from "react-loader-spinner";
 
 import "./axiosdata.css";
 
+
 function AxiosData() {
   const {
     token,
@@ -46,7 +47,7 @@ function AxiosData() {
       if (token) {
         try {
           const response = await axios.post(
-            "https://thingproxy.freeboard.io/fetch/http://hrcdiamonds.com/HRCProvideStock.svc/GetStock",
+             "https://thingproxy.freeboard.io/fetch/http://hrcdiamonds.com/HRCProvideStock.svc/GetStock",
             {
               mode: "no-cors",
               Token: token,

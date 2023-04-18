@@ -1,0 +1,14 @@
+
+.table {
+    height: 470px;
+    width: 97%;
+    margin: 0 auto;
+ 
+  }
+  
+/* css for loader */
+
+.loader{
+ display: flex;
+  justify-content: center; 
+}

@@ -1,13 +1,14 @@
 import "./App.css";
 
-import AxiosData from "./components/AxiosData";
+// import AxiosData from "./components/AxiosData";
+import DemoData from "./components/DemoData";
 
 
 function App() {
   return (
     <div className="App">
-      <AxiosData />
-
+      {/* <AxiosData /> */}
+      <DemoData/>
     </div>
   );
 }
