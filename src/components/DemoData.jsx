@@ -1,22 +1,64 @@
 import React, { useContext, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 import Header from "./Header";
 import { MainContext } from "../context/MainContext";
-import { Audio } from "react-loader-spinner";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  gridPageCountSelector,
+  GridPagination,
+  useGridApiContext,
+  useGridSelector,
+} from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
 
 import "./demodata.css";
 
+import MuiPagination from "@mui/material/Pagination";
+
+function Pagination({ page, onPageChange, className }) {
+  const apiRef = useGridApiContext();
+  const pageCount = useGridSelector(apiRef, gridPageCountSelector);
+
+  return (
+    <MuiPagination
+      color="primary"
+      className={className}
+      count={pageCount}
+      page={page + 1}
+      onChange={(event, newPage) => {
+        onPageChange(event, newPage - 1);
+      }}
+    />
+  );
+}
+
+Pagination.propTypes = {
+  className: PropTypes.string,
+  /**
+   * Callback fired when the page is changed.
+   *
+   * @param {React.MouseEvent<HTMLButtonElement> | null} event The event source of the callback.
+   * @param {number} page The page selected.
+   */
+  onPageChange: PropTypes.func.isRequired,
+  /**
+   * The zero-based index of the current page.
+   */
+  page: PropTypes.number.isRequired,
+};
+
+function CustomPagination(props) {
+  return <GridPagination ActionsComponent={Pagination} {...props} />;
+}
+
 function DemoData() {
-  const {
-    token,
-    setToken,
-    data,
-    setData,
-    searchQuery,
-    isLoad,
-    setIsLoad,
-  } = useContext(MainContext);
+  const { token, setToken, data, setData, searchQuery, isLoad, setIsLoad } =
+    useContext(MainContext);
+
+  const [rowCount, setRowCount] = useState(0);
+
+  const getRowId = (row) => row.STONE_NO;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +93,7 @@ function DemoData() {
           );
 
           setData(response.data.GetStockResult.DATA);
+          setRowCount(response.data.GetStockResult.ROW_COUNT);
           setIsLoad(false);
         } catch (error) {
           console.error(error);
@@ -60,12 +103,11 @@ function DemoData() {
     fetchData();
   }, [token]);
 
-  const currentData = data
-    .filter((item) =>
-      Object.values(item).some((value) =>
-        value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-      )
+  const currentData = data.filter((item) =>
+    Object.values(item).some((value) =>
+      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
     )
+  );
 
   const columns = [
     { field: "STONE_NO", headerName: "STONE NO", flex: 1 },
@@ -78,46 +120,26 @@ function DemoData() {
     { field: "SYM", headerName: "Symmetry", flex: 1 },
     { field: "MEASUREMENTS", headerName: "Measurements", flex: 1 },
     { field: "PRICE", headerName: "Price", flex: 1 },
-    { field: "SELLER", headerName: "Seller", flex: 1 },
-    { field: "LOCATION", headerName: "Location", flex: 1 },
   ];
-
-  const getRowId = (row) => row.STONE_NO;
 
   return (
     <>
       <Header />
-      <div className="container">
-        <div className="d-flex justify-content-center">
-          {isLoad ? (
-            <div className="loader">
-              <Audio
-                height="80"
-                width="80"
-                radius="9"
-                color="blue"
-                ariaLabel="three-dots-loading"
-                // wrapperClass
-              />
-            </div>
-          ) : (
-            <div className="table">
-              <DataGrid
-                checkboxSelection
-                rows={currentData}
-                columns={columns}
-                rowCount={data.length}
-                pagination
-                disableSelectionOnClick
-                getRowId={getRowId}
-                slots={{
-                  toolbar: GridToolbar,
-                }}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      <Box className="table">
+        <DataGrid
+          getRowId={getRowId}
+          rows={currentData}
+          columns={columns}
+          loading={isLoad}
+          disableSelectionOnClick
+          density="compact"
+          pagination
+          slots={{
+            pagination: CustomPagination,
+          }}
+          pageSize={25}
+        />
+      </Box>
     </>
   );
 }
